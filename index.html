@@ -1,142 +1,241 @@
-<!doctype html>
-<html lang="pt">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Controle de Estoque - Anjos Joias</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f5f5f5;
-                margin: 0;
-                padding: 20px
-            }
-            h1 {
-                text-align: center;
-            }
-            .container {
-                max-width: 900px;
-                margin: auto;
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-            input, textarea, button {
-                width: 100%;
-                border-collapse:collapse;
-                margin-top: 20px;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: left;
-            }
-            img {
-                max-width: 80px;
-                border-radius: 5px;
-            }
-        </style>
-       </head>
-       <body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Estoque Joalheria</title>
 
-        <div class="container">
-            <h1>Controle de Estoque Anjos Joias</h1>
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+}
 
-            <h2>Adicionar Produto</h2>
-            <input type="text" id="codigo" placeholder="Código da Joia">
-            <input type="text" id="descricao" placeholder="Descrição">
-            <input type="number" id="quantidade" placeholder="Quantidade">
-            <input type="file" id="foto">
-            <button onclick="adicionarProduto()">Adicionar</button>
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
 
-            <h2>Estoque</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Descrição</th>
-                    <th>Quantidade</th>
-                    <th>Foto</th>
-                    <th>Ações</th>
-                </tr>
-                </thead>
-                <tbody id="tabelaEstoque"></tbody>
-            </table>
-        </div>
+input, select, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+}
 
-        <script>
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
 
-            function adicionarProduto() {
-                const codigo = document.getElementById('codigo').value;
-                const descricao = document.getElementById('descricao').value;
-                const quantidade = document.getElementById('quantidade').value;
-                const fotoInput = document.getElementById('foto');
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
 
-                const file = fotoInput.files[0];
-                const reader = new FileReader();
+img {
+    max-width: 60px;
+}
+</style>
+</head>
 
-                reader.onload = function(e) {
-                    const produto = {
-                        codigo,
-                        descricao,
-                        quantidade,
-                        foto: e.target.result
-                    };
+<body>
 
-                    estoque.push(produto);
-                    atualizarTabela();
-                };
+<div class="container">
 
-                if (file) {
-                    reader.readAsDataURL(file);
-                } else {
-                    const produto = {codigo, descricao, quantidade, foto: '' };
-                    estoque.push(produto);
-                    atualizarTabela();
-                }
+<h1>Controle de Estoque - Joalheria</h1>
 
-                limparCampos();
+<h2>Cadastro / Entrada</h2>
 
-                localStorage.setItem('estoque', JSON.stringify(estoque));
-            }
+<input id="codigo" placeholder="Código (ex: FAB-ANEL-001)">
+<input id="descricao" placeholder="Descrição">
+<input id="categoria" placeholder="Categoria (ANEL, COR, PING...)">
 
-            function atualizarTabela() {
-                const tabela = document.getElementById('tabelaEstoque');
-                 tabela.innerHTML = '';
+<select id="origem">
+<option value="">Origem</option>
+<option value="FAB">Fabricação</option>
+<option value="REV">Revenda</option>
+<option value="REC">Reciclado</option>
+</select>
 
-                estoque.forEach((item, index) => {
-                    tabela.innerHTML +=`
-                    <tr>
-                        <td>${item.codigo}</td>
-                        <td>${item.descricao}</td>
-                        <td>${item.quantidade}</td>
-                        <td>${item.foto ? `<img src="${item.foto}">` : ''}</td>
-                        <td>
-                            <button onclick="removerProduto(${index})">Remover</button>
-                        </td>
-                    </tr>
-                   `;
-                });
-            }
+<input id="peso" type="number" placeholder="Peso (g)">
+<input id="quantidade" type="number" placeholder="Quantidade">
 
-            function removerProduto(index) {
-                estoque.splice(index, 1);
-                atualizarTabela();
-                localStorage.setItem('estoque', JSON.stringify(estoque));
-            }
+<input type="file" id="foto">
 
-            function limparCampos() {
-                document.getElementById('codigo').value= '';
-                document.getElementById('descricao').value= '';
-                document.getElementById('quantidade').value= '';
-                document.getElementById('foto').value= '';
-            }
+<button onclick="entrada()">Entrada</button>
 
-            let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
-            atualizarTabela();
+<h2>Saída</h2>
 
-        </script>
-       </body>
+<input id="codigoSaida" placeholder="Código do produto">
+<input id="qtdSaida" type="number" placeholder="Quantidade">
 
+<button onclick="saida()">Registrar Saída</button>
+
+<h2>Estoque</h2>
+
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Descrição</th>
+<th>Categoria</th>
+<th>Origem</th>
+<th>Peso Total</th>
+<th>Qtd</th>
+<th>Foto</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="tabela"></tbody>
+</table>
+
+<h2>Resumo</h2>
+<p id="resumo"></p>
+
+</div>
+
+<script>
+
+let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
+
+// 🔹 ENTRADA
+function entrada() {
+
+let codigo = document.getElementById('codigo').value;
+let descricao = document.getElementById('descricao').value;
+let categoria = document.getElementById('categoria').value;
+let origem = document.getElementById('origem').value;
+let peso = parseFloat(document.getElementById('peso').value);
+let quantidade = parseInt(document.getElementById('quantidade').value);
+let file = document.getElementById('foto').files[0];
+
+// 🔒 impedir código duplicado
+if (estoque.find(p => p.codigo === codigo)) {
+    alert("Código já existe!");
+    return;
+}
+
+// leitura da imagem
+if (file) {
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        salvarProduto(e.target.result);
+    }
+    reader.readAsDataURL(file);
+} else {
+    salvarProduto('');
+}
+
+function salvarProduto(foto) {
+
+    estoque.push({
+        codigo,
+        descricao,
+        categoria,
+        origem,
+        peso,
+        quantidade,
+        foto
+    });
+
+    salvar();
+}
+
+}
+
+// 🔹 SAÍDA
+function saida() {
+
+let codigo = document.getElementById('codigoSaida').value;
+let qtd = parseInt(document.getElementById('qtdSaida').value);
+
+let produto = estoque.find(p => p.codigo === codigo);
+
+if (!produto) {
+    alert("Produto não encontrado!");
+    return;
+}
+
+if (produto.quantidade < qtd) {
+    alert("Estoque insuficiente!");
+    return;
+}
+
+// reduz quantidade
+produto.quantidade -= qtd;
+
+// reduz peso proporcional
+produto.peso -= (produto.peso / (produto.quantidade + qtd)) * qtd;
+
+salvar();
+}
+
+// 🔹 REMOVER
+function remover(index) {
+estoque.splice(index, 1);
+salvar();
+}
+
+// 🔹 SALVAR E ATUALIZAR
+function salvar() {
+localStorage.setItem('estoque', JSON.stringify(estoque));
+atualizar();
+limpar();
+}
+
+// 🔹 ATUALIZAR TABELA
+function atualizar() {
+
+let tabela = document.getElementById('tabela');
+tabela.innerHTML = '';
+
+let pesoTotal = 0;
+let qtdTotal = 0;
+
+estoque.forEach((p, i) => {
+
+pesoTotal += p.peso;
+qtdTotal += p.quantidade;
+
+tabela.innerHTML += `
+<tr>
+<td>${p.codigo}</td>
+<td>${p.descricao}</td>
+<td>${p.categoria}</td>
+<td>${p.origem}</td>
+<td>${p.peso.toFixed(2)} g</td>
+<td>${p.quantidade}</td>
+<td>${p.foto ? `<img src="${p.foto}">` : ''}</td>
+<td><button onclick="remover(${i})">Remover</button></td>
+</tr>
+`;
+});
+
+// resumo
+document.getElementById('resumo').innerHTML =
+`Peso total: ${pesoTotal.toFixed(2)} g | Total peças: ${qtdTotal}`;
+
+}
+
+// 🔹 LIMPAR CAMPOS
+function limpar() {
+document.getElementById('codigo').value = '';
+document.getElementById('descricao').value = '';
+document.getElementById('categoria').value = '';
+document.getElementById('origem').value = '';
+document.getElementById('peso').value = '';
+document.getElementById('quantidade').value = '';
+document.getElementById('foto').value = '';
+}
+
+// iniciar
+atualizar();
+
+</script>
+
+</body>
 </html>
